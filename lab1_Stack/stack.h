@@ -37,7 +37,7 @@ public:
      * @brief	Деструктор класса стек
      */
     ~Stack(){
-        delete m_arr;
+        delete[] m_arr;
     }
 
     /*!

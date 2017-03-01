@@ -52,6 +52,7 @@ TEST (Stack, TopEmpty){
     ASSERT_EQ(1, st.top());
     st.pop();
     ASSERT_ANY_THROW(st.top());
+
 }
 
 
