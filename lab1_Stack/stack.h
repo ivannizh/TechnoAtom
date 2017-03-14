@@ -107,31 +107,14 @@ Stack<T>::Stack(const Stack &st) :
     ASSERT_VALID();
 }
 
-//void* operator new (size_t sz, void* where_to_call_ctor)
-
 template<class T>
 const Stack<T> &Stack<T>::operator =(const Stack &st){
     ASSERT_VALID();
+	if (&st != this) {
+		Stack::~Stack();
+	    new (this) Stack (st);
+	}
 
-    Stack::~Stack();
-
-    new (this) Stack (st);
-
-
-
-
-
-
-
-//    if(&st != this){
-//        delete m_arr;
-//        m_arr = new T[st.m_maxSize];
-//        m_maxSize = st.m_maxSize;
-//        m_cur = st.m_cur;
-//        for(size_t i = 0; i < m_cur; ++i)
-//            m_arr[i] = st.m_arr[i];
-//    }
-//    ASSERT_VALID();
     return *this;
 }
 
