@@ -10,6 +10,7 @@ class MyIter;
 
 template <class T>
 class MyVector {
+
 private:
     static const int QUOTA = 10;
     int cnt;
@@ -17,113 +18,93 @@ private:
     T* arr;
 
 public:
-    MyVector() : cnt(0), cur(0), arr(nullptr) { }
+    /*!
+     * \brief Пустой конструктор класса MyVector
+     */
+    MyVector();
 
-    MyVector(const MyVector &a) :cnt(a.cnt), cur(a.cur), arr(new T[a.cnt]) {
-        for (int i = 0; i < cur; ++i)
-            arr[i] = a.arr[i];
-    }
+    /*!
+     * \brief копируюший конструктор MyVector
+     * \param a
+     */
+    MyVector(const MyVector &a);
 
-    MyVector(MyVector &&a) :cnt(a.cnt), cur(a.cur), arr(a.arr) {
-        a.arr = nullptr;
-    }
+    /*!
+     * \brief перемещающий конструктор MyVector
+     * \param a
+     */
+    MyVector(MyVector &&a);
 
-    MyVector& operator= (const MyVector &a) {
-        if (this != &a) {
-            delete[] arr;
-            cur = a.cur;
-            cnt = a.cnt;
-            arr = new T[cnt];
-            for (int i = 0; i < cur; ++i)                
-                arr[i] = a.arr[i];
-            return *this;
-        }
-    }
+    /*!
+     * \brief Копирующий оператор равно
+     */
+    MyVector& operator= (const MyVector &a);
 
-    MyVector& operator =(MyVector &&a) {
-        if (this != &a){
-            int tmp = cur;
-            cur = a.cur;
-            a.cur = tmp;
-            tmp = cnt;
-            cnt = a.cnt;
-            a.cnt = tmp;
-            T* tarr = arr;
-            arr = a.arr;
-            a.arr = tarr;
-        }
-        return *this;
-    }
+    /*!
+     * \brief Перемещающее равно
+     */
+    MyVector& operator= (MyVector &&a);
 
-    ~MyVector() {
-        delete[] arr;
-    }
+    /*!
+     * \brief Деструктор класса MyVector
+     */
+    ~MyVector() { delete[] arr; }
 
-    T& operator[] (int index) {
-        if(index < 0 || index >= cur)
-            throw std::out_of_range("");
-        return arr[index];
-    }
+    /*!
+     * \brief Оператор индексирования lvalue
+     * \param Индекс элемента
+     * \return Элемент, который лежит по заданому индексу
+     * \throw std::out_of_range если задан некоректный индекс
+     */
+    T& operator[] (int index) throw (std::out_of_range);
 
-    const T& operator[](int index) const {
-        if(index < 0 || index >= cur)
-            throw std::out_of_range("");
-        return arr[index];
-    }
+    /*!
+     * \brief Оператор индексирования rvalue
+     * \param Индекс элемента
+     * \return Элемент, который лежит по заданому индексу
+     * \throw std::out_of_range если задан некоректный индекс
+     */
+    const T& operator[](int index) const throw (std::out_of_range);
 
+    /*!
+     * \brief Возвращает текущий размер массива
+     */
     size_t size() const { return cur; }
 
     friend class MyIter<T>;
     typedef MyIter<T> iterator;
 
+    /*!
+     * \brief Возвращает итератор, указывающий на первый элемент
+     */
+    iterator begin() const { return iterator(arr); }
 
-    iterator begin() const{
-        return iterator(arr);
-    }
+    /*!
+     * \brief Возвращает итератор, указывающий на последний элемент
+     */
+    iterator end() const { return iterator(arr + cur); }
 
-    iterator end() const {
-        return iterator(arr + cur);
-    }
+    /*!
+     * \brief Очищает массив
+     */
+    void clear();
 
-    void clear() {
-        cur = 0;
-        cnt = 0;
-        delete[] arr;
-        arr = nullptr;
-    }
+    /*!
+     * \brief Закидывает в конец новый элемент
+     * \param Элемент для закидывания
+     */
+    void push_back(const T& t);
 
-    void push_back(const T& t){
-        if(cur + 1 >= cnt){
-            T* tmp = new T[cnt + QUOTA];
-            for(int i = 0; i < cur; ++i)
-                tmp[i] = arr[i];
-            cnt += QUOTA;
-            delete[] arr;
-            arr = tmp;
-        }
-        arr[cur] = t;
-        ++cur;
-    }
+    /*!
+     * \brief Возвращает последний элемент в массиве
+     */
+    T back() { return *(iterator(arr + cur - 1)); }
 
-    T back() {
-        return *(iterator(arr + cur - 1));
-    }
-
-    MyVector& erase(const iterator &it){
-        for(int i = 0; i < cur; i++){
-            if(it == &arr[i]){
-                T tmp;
-                for(int j = i; j < cur -1; j++){
-                    tmp = arr[j];
-                    arr[j] = arr[j+1];
-                    arr[j+1] = tmp;
-                }
-                --cur;
-                break;
-            }
-        }
-        return *this;
-    }
+    /*!
+     * \brief Удаляет элемент массива
+     * \param Итератор, указывающий на элемнт для удаления
+     */
+    MyVector& erase(const iterator &it);
 
 };
 
@@ -133,62 +114,216 @@ private:
     T* cur;
 public:
 
-    MyIter() :cur(nullptr){}
-    MyIter(T *it) :cur(it){}
+    /*!
+     * \brief Пустой конструктор MyIter
+     */
+    MyIter();
 
-    MyIter operator-(int index){
-        return MyIter(cur - index);
-    }
+    /*!
+     * \brief Конструктор MyIter
+     * \param it Принимает укзатель на элемнт массива
+     */
+    MyIter(T *it);
 
-    MyIter operator+(int index){
-        return MyIter(cur + index);
-    }
+    /*!
+     * \brief Уменьшает итератор
+     * \param index на сколько надо его уменьшить
+     * \return
+     */
+    MyIter operator- (int index) { return MyIter(cur - index); }
 
-    T* operator->() const {
-        return cur;
-    }
+    /*!
+     * \brief Увеличивает итератор
+     * \param index на сколько надо его увеличить
+     * \return
+     */
+    MyIter operator+ (int index) { return MyIter(cur + index); }
 
-    T& operator* () const {
-        if(cur)
-            return *cur;
-        throw std::runtime_error("illegal value for MyVector Iterator");
-    }
+    /*!
+     * \brief Оператор разыменования и обращения
+     * \return
+     */
+    T* operator->() const { return cur; }
 
-    int operator !=(const MyIter& it) const {
-        return cur != it.cur;
-    }
+    /*!
+     * \brief Оператор разыменования
+     * \throw std::runtime_error если разыменование прошло некоректно
+     */
+    T& operator* () const throw (std::runtime_error);
 
-    int operator == (const T* t) const{
-        return t == cur;
-    }
+    /*!
+     * \brief Оператор "не равен"
+     * \param it итератор, с которым происходит сравнение
+     * \return true(1), false(0)
+     */
+    int operator !=(const MyIter& it) const { return cur != it.cur; }
 
-    int operator ==(const MyIter& it) const {
-        return cur == it.cur;
-    }
+    /*!
+     * \brief Оператор сравнения с указателем
+     * \param it итератор, с которым происходит сравнение
+     * \return true(1), false(0)
+     */
+    int operator == (const T* t) const { return t == cur; }
 
-    MyIter& operator++() {
-        ++cur;
-        return *this;
-    }
+    /*!
+     * \brief Оператор сравнения с итератором
+     * \param it итератор, с которым происходит сравнение
+     * \return true(1), false(0)
+     */
+    int operator ==(const MyIter& it) const { return cur == it.cur; }
 
-    MyIter operator++(int) {
-        MyIter res;
-        res.cur = cur;
-        ++cur;
-        return res;
-    }
+    /*!
+     * \brief Префиксный инкремент
+     */
+    MyIter& operator++();
 
-    MyIter & operator--() {
-        ++cur;
-        return *this;
-    }
+    /*!
+     * \brief Постфиксный инкремент
+     */
+    MyIter operator++(int);
 
-    MyIter operator--(int) {
-        MyIter res;
-        res.cur = cur;
-        ++cur;
-        return res;
-    }
+    /*!
+     * \brief Префиксный декремент
+     */
+    MyIter & operator--();
+
+    /*!
+     * \brief Постфиксный декремент
+     */
+    MyIter operator--(int);
 };
 
 #endif // MYVECTOR_H
+
+template<class T>
+MyVector<T>::MyVector() :
+    cnt(0),
+    cur(0),
+    arr(nullptr) {}
+
+template<class T>
+MyVector<T>::MyVector(const MyVector<T> &a) :
+    cnt(a.cnt),
+    cur(a.cur),
+    arr(new T[a.cnt]) { for (int i = 0; i < cur; ++i) arr[i] = a.arr[i]; }
+
+template<class T>
+MyVector<T>::MyVector(MyVector<T> &&a) :
+    cnt(a.cnt),
+    cur(a.cur),
+    arr(a.arr) { a.arr = nullptr; }
+
+template<class T>
+MyVector<T>& MyVector<T>::operator=(const MyVector<T> &a) {
+    if (this != &a) {
+        MyVector<T>::~MyVector();
+        new (this) MyVector(a);
+    }
+    return *this;
+}
+
+template<class T>
+MyVector<T>& MyVector<T>::operator =(MyVector<T> &&a) {
+    if (this != &a){
+        cur = a.cur;
+        cnt = a.cnt;
+        delete arr;
+        arr = a.arr;
+        a.arr = nullptr;
+    }
+    return *this;
+}
+
+template<class T>
+T &MyVector<T>::operator[](int index) throw (std::out_of_range){
+    if(index < 0 || index >= cur)
+        throw std::out_of_range("");
+    return arr[index];
+}
+
+template<class T>
+const T &MyVector<T>::operator[](int index) const throw (std::out_of_range) {
+    if(index < 0 || index >= cur)
+        throw std::out_of_range("");
+    return arr[index];
+}
+
+template<class T>
+void MyVector<T>::clear() {
+    cur = 0;
+    cnt = 0;
+    delete[] arr;
+    arr = nullptr;
+}
+
+template<class T>
+void MyVector<T>::push_back(const T &t){
+    if(cur + 1 >= cnt){
+        T* tmp = new T[cnt + QUOTA];
+        for(int i = 0; i < cur; ++i)
+            tmp[i] = arr[i];
+        cnt += QUOTA;
+        delete[] arr;
+        arr = tmp;
+    }
+    arr[cur] = t;
+    ++cur;
+}
+
+template<class T>
+MyVector<T>& MyVector<T>::erase(const MyVector<T>::iterator &it){
+    for(int i = 0; i < cur; i++){
+        if(it == &arr[i]){
+            T tmp;
+            for(int j = i; j < cur -1; j++){
+                tmp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = tmp;
+            }
+            --cur;
+            break;
+        }
+    }
+    return *this;
+}
+
+template<class T>
+MyIter<T>::MyIter()      : cur (nullptr) {}
+
+template<class T>
+MyIter<T>::MyIter(T *it) : cur (it)      {}
+
+template<class T>
+T &MyIter<T>::operator*() const throw (std::runtime_error) {
+    if(cur)
+        return *cur;
+    throw std::runtime_error("illegal value for MyVector Iterator");
+}
+
+template<class T>
+MyIter<T> &MyIter<T>::operator++() {
+    ++cur;
+    return *this;
+}
+
+template<class T>
+MyIter<T> MyIter<T>::operator++(int) {
+    MyIter res;
+    res.cur = cur;
+    ++cur;
+    return res;
+}
+
+template<class T>
+MyIter<T> &MyIter<T>::operator--() {
+    ++cur;
+    return *this;
+}
+
+template<class T>
+MyIter<T> MyIter<T>::operator--(int) {
+    MyIter res;
+    res.cur = cur;
+    ++cur;
+    return res;
+}
