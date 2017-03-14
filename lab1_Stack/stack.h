@@ -21,7 +21,11 @@ public:
     /*!
      * @brief	Конструкор, создающий пустой стек
      */
-    Stack () : m_arr(nullptr), m_cur(0), m_maxSize(0) {}
+    Stack () :
+        m_arr     (nullptr),
+        m_cur     (0),
+        m_maxSize (0)
+        {}
 
     /*!
      * @brief	Копирущий конструтор класса стек
@@ -29,14 +33,14 @@ public:
     Stack (const Stack& st);
 
     /*!
-     * @brief	Копирущее равно
+     * @brief	Копирующее равно
      */
-    Stack& operator = (const Stack& st);
+    const Stack& operator = (const Stack& st);
 
     /*!
      * @brief	Деструктор класса стек
      */
-    ~Stack(){
+    ~Stack() {
         delete[] m_arr;
     }
 
@@ -92,25 +96,42 @@ private:
 #endif // STACK_H
 
 template<class T>
-Stack<T>::Stack(const Stack &st) : m_arr(new T[st.m_maxSize]), m_cur(st.m_cur), m_maxSize(st.m_maxSize) {
+Stack<T>::Stack(const Stack &st) :
+    m_arr(new T[st.m_maxSize]),
+    m_cur(st.m_cur),
+    m_maxSize(st.m_maxSize)
+{
     ASSERT_VALID();
     for(size_t i = 0; i < st.m_cur; ++i)
         m_arr[i] = st.m_arr[i];
     ASSERT_VALID();
 }
 
+//void* operator new (size_t sz, void* where_to_call_ctor)
+
 template<class T>
-Stack<T> &Stack<T>::operator =(const Stack &st){
+const Stack<T> &Stack<T>::operator =(const Stack &st){
     ASSERT_VALID();
-    if(&st != this){
-        delete m_arr;
-        m_arr = new T[st.m_maxSize];
-        m_maxSize = st.m_maxSize;
-        m_cur = st.m_cur;
-        for(size_t i = 0; i < m_cur; ++i)
-            m_arr[i] = st.m_arr[i];
-    }
-    ASSERT_VALID();
+
+    Stack::~Stack();
+
+    new (this) Stack (st);
+
+
+
+
+
+
+
+//    if(&st != this){
+//        delete m_arr;
+//        m_arr = new T[st.m_maxSize];
+//        m_maxSize = st.m_maxSize;
+//        m_cur = st.m_cur;
+//        for(size_t i = 0; i < m_cur; ++i)
+//            m_arr[i] = st.m_arr[i];
+//    }
+//    ASSERT_VALID();
     return *this;
 }
 
@@ -130,7 +151,7 @@ size_t Stack<T>::size() const {
 }
 
 template<class T>
-void Stack<T>::push(const T &value) throw (std::bad_alloc){
+void Stack<T>::push(const T &value) throw (std::bad_alloc) {
     ASSERT_VALID();
     if(m_cur+1 >= m_maxSize) {
         m_maxSize += QUOTA;
